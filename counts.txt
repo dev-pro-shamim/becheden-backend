@@ -1,0 +1,20 @@
+01. Authentication: 9
+02. User Profile: 9
+03. Ads: 9
+04. Lottery: 8
+05. Subscription & Wallet: 8
+06. Vendor: 3
+07. Alerts & Saved Searches: 7
+08. Locations: 1
+09. Admin - Lottery: 5
+10. Admin - Subscription: 3
+11. Admin - Vendor: 5
+12. Admin - Location: 4
+13. Admin - Admins: 4
+14. Payment: 2
+15. Page (CMS): 3
+16. Favourites: 3
+17. Contact: 2
+18. Category: 9
+19. Alert: 7
+20. Admin - Ads: 7

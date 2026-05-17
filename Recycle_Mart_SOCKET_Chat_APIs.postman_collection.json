@@ -1,0 +1,165 @@
+{
+  "info": {
+    "_postman_id": "f1d3f7a4-9c1d-4a3e-9b4b-1c8d2c6b7e91",
+    "name": "Recycle Mart - Socket Chats (Socket.IO)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Socket.IO chat namespace: /chat. Auth via handshake token (JWT access token).\n\nServer expects token via:\n- socket.handshake.auth.token OR\n- Authorization: Bearer <token>\n\nNote: This project does not expose REST chat endpoints; Socket events are the source of truth."
+  },
+  "item": [
+    {
+      "name": "Socket.IO - Connect",
+      "item": [
+        {
+          "name": "Connect to /chat (info)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/socket.io/?EIO=4&transport=websocket",
+              "host": ["{{baseUrl}}"],
+              "path": ["socket.io", ""],
+              "query": [
+                { "key": "EIO", "value": "4" },
+                { "key": "transport", "value": "websocket" }
+              ]
+            },
+            "description": "Socket.IO server endpoint is the default /socket.io.\nNamespace: /chat\n\nClient example:\nio('{{baseUrl}}/chat', {\n  auth: { token: '{{accessToken}}' }\n})\n\nAlternatively server also reads Authorization header (Bearer token) from handshake headers."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Socket Events (use in client emits)",
+      "description": "All client emits should use ack callback.\nAck format:\n{\n  success: boolean,\n  message: string,\n  data?: any,\n  meta?: any,\n  errorSources?: any[]\n}\n\nThese are Socket events from src/app/modules/Chat/chat.socket.ts",
+      "item": [
+        {
+          "name": "chat:conversation:upsert",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:conversation:upsert\nPayload:\n{\n  \"adId\": \"<adId>\",\n  \"participantId\": \"<userId>\"\n}\n\nAck success data: Conversation document"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:conversation:list",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:conversation:list\nPayload:\n{ \"searchTerm\": \"\", \"page\": 1, \"limit\": 20 }\n\nAck:\n- data: conversations[]\n- meta: pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:conversation:join",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:conversation:join\nPayload:\n{ \"conversationId\": \"<conversationId>\" }\n\nServer joins socket room = conversationId"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:message:list",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:message:list\nPayload (cursor based):\n{ \"conversationId\": \"<conversationId>\", \"cursor\": \"<messageId>\", \"limit\": 30 }\n\nOr page based:\n{ \"conversationId\": \"<conversationId>\", \"page\": 1, \"limit\": 30 }\n\nAck data: messages[]"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:message:send",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:message:send\nPayload (text):\n{ \"conversationId\": \"<conversationId>\", \"text\": \"Hello\" }\n\nPayload (attachment):\n{\n  \"conversationId\": \"<conversationId>\",\n  \"text\": \"optional\",\n  \"attachment\": {\n    \"type\": \"image\",\n    \"url\": \"https://...\",\n    \"name\": \"photo.jpg\",\n    \"size\": 12345\n  }\n}\n\nServer broadcast: chat:message:new to room"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:typing",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:typing\nPayload:\n{ \"conversationId\": \"<conversationId>\", \"isTyping\": true }\n\nServer emits to others in room: chat:typing"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:conversation:read",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:conversation:read\nPayload:\n{ \"conversationId\": \"<conversationId>\" }\n\nMarks read in DB (ConversationReadModel)"
+          },
+          "response": []
+        },
+        {
+          "name": "chat:block",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Client emit: chat:block\nPayload:\n{ \"userId\": \"<blockedUserId>\", \"reason\": \"optional\" }\n\nCreates/updates ChatBlockModel (unique user+blockedUser)"
+          },
+          "response": []
+        },
+        {
+          "name": "Server Event: chat:message:new",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}",
+              "host": ["{{baseUrl}}"]
+            },
+            "description": "Server emits: chat:message:new\nTriggered after chat:message:send. Subscribe on client:\nsocket.on('chat:message:new', (msg) => { ... })"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "PASTE_JWT_ACCESS_TOKEN_HERE",
+      "type": "string"
+    }
+  ]
+}
