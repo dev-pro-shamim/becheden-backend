@@ -30,6 +30,17 @@ const getExtraData = asyncHandler(async (req, res) => {
   });
 });
 
+const updateWebsiteLogo = asyncHandler(async (req, res) => {
+  const file = req.file as Express.Multer.File | undefined;
+  const result = await ExtraDataService.updateWebsiteLogoInDB(file);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: 'Website logo updated successfully!',
+    data: result,
+  });
+});
+
 // updateExtraDataLink
 const updateExtraDataLink = asyncHandler(async (req, res) => {
   const { linkKey, link } = req.body;
@@ -58,6 +69,7 @@ const updateExtraDataHeading = asyncHandler(async (req, res) => {
 
 export const ExtraDataController = {
   upsertExtraData,
+  updateWebsiteLogo,
   updateExtraDataLink,
   updateExtraDataHeading,
   getExtraData,

@@ -41,8 +41,13 @@ const updateExtraDataHeadingSchema = z.object({
     .strict(),
 });
 
+const updateWebsiteLogoSchema = z.object({
+  body: z.object({}).strict(),
+});
+
 export const ExtraDataValidation = {
   upsertExtraDataSchema,
   updateExtraDataLinkSchema,
   updateExtraDataHeadingSchema,
+  updateWebsiteLogoSchema,
 };

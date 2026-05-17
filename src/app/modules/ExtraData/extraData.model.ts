@@ -3,6 +3,11 @@ import { IExtraData } from './extraData.interface';
 
 const extraDataSchema = new Schema<IExtraData>(
   {
+    websiteLogo: {
+      type: String,
+      default: null,
+    },
+
     adImage1: {
       type: String,
       default: null,
