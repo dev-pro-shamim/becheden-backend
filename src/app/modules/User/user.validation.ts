@@ -68,17 +68,6 @@ const createUserSchema = z.object({
         });
       }
 
-      // tradeLicenseNumber
-      if (
-        data.role === ROLE.VENDOR &&
-        (!data.tradeLicenseNumber || data.tradeLicenseNumber.trim() === '')
-      ) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['tradeLicenseNumber'],
-          message: 'Trade license number is required when role is Vendor!',
-        });
-      }
     }),
 });
 

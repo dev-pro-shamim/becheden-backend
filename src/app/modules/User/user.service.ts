@@ -29,7 +29,7 @@ import { VENDOR_STATUS } from '../Vendor/vendor.constant';
 type TVendorSignupExtras = {
   storeName: string;
   storeLocation: string;
-  tradeLicenseNumber: string;
+  tradeLicenseNumber?: string;
 };
 
 type TVendorFileMap = Partial<
@@ -124,31 +124,17 @@ const createUserInDB = async (
     let tradeLicenseUrl: string | undefined;
 
     if (newUser.role === ROLE.VENDOR) {
-      // const hasStoreImage = Boolean(vendorFiles?.storeImage?.[0]);
-      const hasTradeLicense = Boolean(vendorFiles?.tradeLicense?.[0]);
-
-      // if (!hasStoreImage) {
-      //   throw new AppError(
-      //     httpStatus.BAD_REQUEST,
-      //     'Store image file is required for vendor signup!'
-      //   );
-      // }
-
-      if (!hasTradeLicense) {
-        throw new AppError(
-          httpStatus.BAD_REQUEST,
-          'Trade license document is required for vendor signup!',
-        );
-      }
-
       try {
+        const storeImageFile = vendorFiles?.storeImage?.[0];
+        const tradeLicenseFile = vendorFiles?.tradeLicense?.[0];
+
         const [storeUpload, licenseUpload] = await Promise.all([
-          sendImageToCloudinary(vendorFiles!.storeImage![0]),
-          sendImageToCloudinary(vendorFiles!.tradeLicense![0]),
+          storeImageFile ? sendImageToCloudinary(storeImageFile) : null,
+          tradeLicenseFile ? sendImageToCloudinary(tradeLicenseFile) : null,
         ]);
 
-        storeImageUrl = storeUpload.secure_url;
-        tradeLicenseUrl = licenseUpload.secure_url;
+        storeImageUrl = storeUpload?.secure_url?.trim();
+        tradeLicenseUrl = licenseUpload?.secure_url?.trim();
       } catch (uploadError) {
         throw new AppError(
           httpStatus.INTERNAL_SERVER_ERROR,
@@ -157,24 +143,16 @@ const createUserInDB = async (
         );
       }
 
-      storeImageUrl = storeImageUrl.trim();
-      tradeLicenseUrl = tradeLicenseUrl.trim();
-
-      if (!storeImageUrl || !tradeLicenseUrl) {
-        throw new AppError(
-          httpStatus.INTERNAL_SERVER_ERROR,
-          'Uploaded vendor document URLs are invalid',
-        );
-      }
-
       try {
         await VendorModel.create({
           user: newUser._id,
           storeName,
           storeLocation,
-          tradeLicenseNumber,
-          tradeLicense: tradeLicenseUrl,
-          storeImage: storeImageUrl,
+          ...(tradeLicenseNumber?.trim() && {
+            tradeLicenseNumber: tradeLicenseNumber.trim(),
+          }),
+          ...(tradeLicenseUrl && { tradeLicense: tradeLicenseUrl }),
+          ...(storeImageUrl && { storeImage: storeImageUrl }),
           status: VENDOR_STATUS.PENDING,
           blocked: false,
           listingsUsed: 0,

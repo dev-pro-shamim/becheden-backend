@@ -176,14 +176,7 @@ const updateVendorProfileInDB = async (
   if (typeof payload.tradeLicenseNumber === 'string') {
     const trimmed = payload.tradeLicenseNumber.trim();
 
-    if (!trimmed) {
-      throw new AppError(
-        httpStatus.BAD_REQUEST,
-        'Trade license number cannot be empty'
-      );
-    }
-
-    vendor.tradeLicenseNumber = trimmed;
+    vendor.tradeLicenseNumber = trimmed || undefined;
   }
 
   const storeImageFile = getSingleFile(files, 'storeImage');
@@ -220,13 +213,6 @@ const updateVendorProfileInDB = async (
       'Vendor profile missing essential store information'
     );
   }
-  if (!vendor.tradeLicense || !vendor.tradeLicenseNumber) {
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      'Vendor profile missing required documents'
-    );
-  }
-
   const resubmitForReview =
     typeof payload.resubmitForReview === 'string'
       ? payload.resubmitForReview.toLowerCase() === 'true'

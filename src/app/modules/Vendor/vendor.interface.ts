@@ -6,11 +6,11 @@ export interface IVendor extends Document {
   user: Types.ObjectId;
 
   storeName: string;
-  storeImage: string;
+  storeImage?: string;
   storeLocation: string;
 
-  tradeLicense: string;
-  tradeLicenseNumber: string;
+  tradeLicense?: string;
+  tradeLicenseNumber?: string;
 
   status: TVendorStatus;
   approvalNote?: string | null;

@@ -16,7 +16,6 @@ const vendorSchema = new Schema<IVendor>(
     },
     storeImage: {
       type: String,
-      required: [true, 'Store image is required!'],
     },
     storeLocation: {
       type: String,
@@ -25,11 +24,9 @@ const vendorSchema = new Schema<IVendor>(
     },
     tradeLicense: {
       type: String,
-      required: [true, 'Trade License is required!'],
     },
     tradeLicenseNumber: {
       type: String,
-      required: [true, 'Trade License number is required!'],
       trim: true,
     },
     status: {
