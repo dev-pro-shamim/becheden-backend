@@ -73,6 +73,19 @@ const toggleUserBlock = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+  const result = await AdminService.deleteUserInDB(
+    req.user,
+    req.params.id as string,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: 'User deleted successfully!',
+    data: result,
+  });
+});
+
 export const AdminController = {
   getAllAdmins,
   createAdmin,
@@ -80,4 +93,5 @@ export const AdminController = {
   superAdminDeleteAdmin,
   getDashboardStats,
   toggleUserBlock,
+  deleteUser,
 };

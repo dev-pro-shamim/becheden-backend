@@ -69,4 +69,10 @@ router.patch(
   VendorController.unblockVendor
 );
 
+router.delete(
+  '/:id',
+  auth(ROLE.ADMIN, ROLE.SUPER_ADMIN),
+  VendorController.deleteVendor
+);
+
 export const VendorRoutes = router;

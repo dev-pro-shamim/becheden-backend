@@ -7,6 +7,8 @@ import { sendImageToCloudinary } from '../../lib';
 import VendorModel from './vendor.model';
 import { VENDOR_STATUS } from './vendor.constant';
 import { IVendor } from './vendor.interface';
+import UserModel from '../User/user.model';
+import { AdModel } from '../Ad/ad.model';
 
 export type VendorFileMap = Partial<
   Record<'storeImage' | 'tradeLicense', Express.Multer.File[]>
@@ -431,6 +433,44 @@ const unblockVendorInDB = async (vendorId: string, adminId: Types.ObjectId) => {
   return vendor;
 };
 
+const deleteVendorInDB = async (vendorId: string, adminId: Types.ObjectId) => {
+  if (!Types.ObjectId.isValid(vendorId)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid vendor id!');
+  }
+
+  const vendor = await VendorModel.findById(vendorId);
+
+  if (!vendor) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Vendor not found!');
+  }
+
+  if (String(vendor.user) === String(adminId)) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'You cannot delete your own vendor account!',
+    );
+  }
+
+  const [deletedVendor, deletedUser] = await Promise.all([
+    VendorModel.findByIdAndDelete(vendor._id),
+    UserModel.findByIdAndUpdate(
+      vendor.user,
+      {
+        isDeleted: true,
+        isActive: false,
+        deactivationReason: 'Deleted by admin',
+      },
+      { new: true, select: 'name email role isDeleted' },
+    ),
+    AdModel.updateMany({ user: vendor.user }, { status: 'ARCHIVED' }),
+  ]);
+
+  return {
+    vendor: deletedVendor,
+    user: deletedUser,
+  };
+};
+
 export const VendorService = {
   // registerVendorInDB,
   updateVendorProfileInDB,
@@ -441,4 +481,5 @@ export const VendorService = {
   rejectVendorInDB,
   blockVendorInDB,
   unblockVendorInDB,
+  deleteVendorInDB,
 };

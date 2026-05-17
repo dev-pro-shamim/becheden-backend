@@ -1,4 +1,5 @@
 import httpStatus from 'http-status';
+import { Types } from 'mongoose';
 import { IUser } from '../User/user.interface';
 import UserModel from '../User/user.model';
 import { AppError } from '../../utils';
@@ -129,6 +130,10 @@ const toggleUserBlockInDB = async (
     throw new AppError(httpStatus.BAD_REQUEST, 'User id is required!');
   }
 
+  if (!Types.ObjectId.isValid(userId)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Invalid user id!');
+  }
+
   const user = await UserModel.findById(userId);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
@@ -162,6 +167,49 @@ const toggleUserBlockInDB = async (
   return result;
 };
 
+const deleteUserInDB = async (adminUser: IUser, userId: string) => {
+  if (!userId) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User id is required!');
+  }
+
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+
+  if (String(user._id) === String(adminUser._id)) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'You cannot delete your own account!',
+    );
+  }
+
+  if (user.role === ROLE.ADMIN || user.role === ROLE.SUPER_ADMIN) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      'Admin accounts cannot be deleted from user management!',
+    );
+  }
+
+  user.isDeleted = true;
+  user.isActive = false;
+  user.deactivationReason = 'Deleted by admin';
+  await user.save();
+
+  await Promise.all([
+    VendorModel.findOneAndDelete({ user: user._id }),
+    AdModel.updateMany({ user: user._id }, { status: 'ARCHIVED' }),
+  ]);
+
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isDeleted: user.isDeleted,
+  };
+};
+
 export const AdminService = {
   getAllAdminsFromDB,
   createAdminInDB,
@@ -169,4 +217,5 @@ export const AdminService = {
   superAdminDeleteAdminFromDB,
   getDashboardStatsFromDB,
   toggleUserBlockInDB,
+  deleteUserInDB,
 };

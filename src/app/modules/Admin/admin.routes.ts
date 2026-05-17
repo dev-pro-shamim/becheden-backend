@@ -50,4 +50,10 @@ router.patch(
   AdminController.toggleUserBlock,
 );
 
+router.delete(
+  '/users/:id',
+  auth(ROLE.ADMIN, ROLE.SUPER_ADMIN),
+  AdminController.deleteUser,
+);
+
 export const AdminRoutes = router;

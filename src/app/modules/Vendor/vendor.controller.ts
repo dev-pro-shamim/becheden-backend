@@ -126,6 +126,20 @@ const unblockVendor = asyncHandler(async (req, res) => {
   });
 });
 
+const deleteVendor = asyncHandler(async (req, res) => {
+  const adminId = new Types.ObjectId(req.user._id);
+  const result = await VendorService.deleteVendorInDB(
+    req.params.id as string,
+    adminId,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    message: 'Vendor deleted successfully!',
+    data: result,
+  });
+});
+
 export const VendorController = {
   // registerVendor,
   updateVendorProfile,
@@ -136,4 +150,5 @@ export const VendorController = {
   rejectVendor,
   blockVendor,
   unblockVendor,
+  deleteVendor,
 };
