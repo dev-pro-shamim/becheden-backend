@@ -1,6 +1,8 @@
 import { Document } from 'mongoose';
 
 export interface IExtraData extends Document {
+  websiteLogo?: string | null;
+
   adImage1?: string | null;
   adImage2?: string | null;
   adImage3?: string | null;

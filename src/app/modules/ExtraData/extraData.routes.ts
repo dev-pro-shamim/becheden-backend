@@ -23,6 +23,15 @@ router.post(
   ExtraDataController.upsertExtraData,
 );
 
+// Update website logo
+router.post(
+  '/logo',
+  auth(ROLE.ADMIN, ROLE.SUPER_ADMIN),
+  multerUpload.single('logo'),
+  validateRequestFromFormData(ExtraDataValidation.updateWebsiteLogoSchema),
+  ExtraDataController.updateWebsiteLogo,
+);
+
 // Update global extra data: update a single link slot (link1/link2)
 router.post(
   '/link',

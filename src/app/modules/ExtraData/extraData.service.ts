@@ -62,6 +62,27 @@ const updateExtraDataImageInDB = async (
   return updated;
 };
 
+const updateWebsiteLogoInDB = async (file: Express.Multer.File | undefined) => {
+  if (!file) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Logo file is required!');
+  }
+
+  const uploaded = await sendImageToCloudinary(file);
+
+  const updated = await ExtraDataModel.findOneAndUpdate(
+    {},
+    { websiteLogo: uploaded.secure_url },
+    { new: true, upsert: true, runValidators: true },
+  ).select('websiteLogo -_id');
+
+  if (!updated) {
+    await deleteImageFromCloudinary(uploaded.secure_url);
+    throw new AppError(httpStatus.NOT_MODIFIED, 'Website logo not updated!');
+  }
+
+  return updated;
+};
+
 // updateExtraDataLinkInDB
 const updateExtraDataLinkInDB = async (linkKey: string, link: string) => {
   const payload: {
@@ -107,11 +128,12 @@ const updateExtraDataHeadingInDB = async (heading: string[]) => {
 
 const getExtraDataFromDB = async () => {
   const doc = await ExtraDataModel.findOne({}).select(
-    'adImage1 adImage2 adImage3 adImage4 adImage5 adImage6 adImage7 link1 link2 heading -_id',
+    'websiteLogo adImage1 adImage2 adImage3 adImage4 adImage5 adImage6 adImage7 link1 link2 heading -_id',
   );
 
   if (!doc) {
     return {
+      websiteLogo: null,
       adImage1: null,
       adImage2: null,
       adImage3: null,
@@ -130,6 +152,7 @@ const getExtraDataFromDB = async () => {
 
 export const ExtraDataService = {
   updateExtraDataImageInDB,
+  updateWebsiteLogoInDB,
   updateExtraDataLinkInDB,
   updateExtraDataHeadingInDB,
   getExtraDataFromDB,
