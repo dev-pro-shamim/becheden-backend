@@ -1,4 +1,4 @@
-﻿# Recycle Mart APIs
+﻿# Beche Den APIs
 
 Base URL: `/api/v1`
 

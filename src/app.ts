@@ -18,10 +18,10 @@ app.use(
   cors({
     // credentials: true,
     origin: [
-      'https://recyclemart.com.bd',
-      'https://www.recyclemart.com.bd',
-      'https://dashboard.recyclemart.com.bd',
-      'https://www.dashboard.recyclemart.com.bd',
+      'https://becheden.com.bd',
+      'https://www.becheden.com.bd',
+      'https://dashboard.becheden.com.bd',
+      'https://www.dashboard.becheden.com.bd',
     ],
   }),
 );
