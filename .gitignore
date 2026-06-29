@@ -82,6 +82,7 @@ web_modules/
 .env.development.local
 .env.test.local
 .env.production.local
+.env*
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -152,4 +153,3 @@ bun.lock
 yarn.lock
 .vscode
 .env*.local
-config.bat
